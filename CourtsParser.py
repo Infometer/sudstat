@@ -10,7 +10,7 @@ def isint(s):
         return False
 
 directory = "d:/WorkDir2/Python3/CourtsParser"
-content = get_data(os.path.join(directory, "Копия F1-ug_pr-vo_1_inst-2015.xlsx"))
+content = get_data(os.path.join(directory, "N-1-за-12-месяцев-2015-г.xlsx"))
 table_top = 0
 table_right = 0
 table_left = 0
@@ -23,38 +23,47 @@ for c in list(content.items()):
     #цикл по строкам листа. в одной строке может быть несколько таблиц
     for i, d in enumerate(data):
         count_No = str(d).replace(r"\n","").replace(" ", "").lower().count("№стр")
-        #count_A = d.count("А")
         #ищем таблицы по признаку наличия ячейки "№ стр"
         if count_No > 0:
-            table_top = i #верхняя строка таблицы
+            top = i #top = верхняя строка каждой таблицы
             for k, d1 in enumerate(data):
-                if k>i and d1.count(1): #ищем левую границу таблиц - там должна быть записана единица
+                if k>i and d1.count(1): #ищем левую границу данных в таблице - там должна быть записана единица
                     print(("{0}: всего: {1} {2}").format(str(c[0]), count_No, str(d)))
                     print(("{0}: {1}").format(str(c[0]), str(d1)))
-                    first_datacol_id = [l for l, x in enumerate(d1) if isint((x))]
-                    first_datacol = [x for x, x in enumerate(d1) if isint((x))]
+                    first_datacol_id = [l for l, x in enumerate(d1) if isint((x))] #строка таблицы с номерами строк
+                    first_datacol = [x for x, x in enumerate(d1) if isint((x))] #номера ячеек с номерами строк
+                    ones = [l for l, x in enumerate(first_datacol) if x==1] #номера по горизонтали ячеек, содержащих "1"
                     print(first_datacol_id)
-                    #first_datacol.append(1)
                     print(first_datacol)
-                    #for n, nc in enumerate(first_datacol):
-                     #   if nc[n] == 1:
-                      #      if n > 0:
-                       #         print (("id for 1={0}, id for last={1}, last={2}").format(first_datacol_id[n], first_datacol_id[n-1], first_datacol[]))
-                        #elif nc[n] > nc[n-1]
+                    print(ones)
+                    for l, one in enumerate(ones):
+                        #определяем левую и правую границы данных (цифра "1" и последняя цифра в той же строке
+                        left = first_datacol_id[one]
+                        try:
+                            right = first_datacol_id[ones[l + 1] - 1]
+                        except:
+                            right = first_datacol_id[len(first_datacol_id) - 1]
+                        #определяем нижнюю границу таблицы: от "1" по горизонтали сместиться на одну позицию
+                        #влево и вниз (это kk > k) и перебирать столбец, пока в нем есть цифра.
+                        #последняя цифра и есть нижняя граница таблицы
+                        for kk, d2 in enumerate(data):
+                            if kk > k:
+                                if len(d2) >= left and isint(d2[left - 1]):
+                                    bottom = kk
+                                else:
+                                    break
 
-                    #for n, nc in enume
-                    # for n, nc in enumerate(d1):
-                    #         if n >= first_datacol_id:
-                    #             if isint(nc):
-                    #                 table_right = int(nc)
-                    #             else:
-                    #                 print (table_right)
-                    #                 break
 
-
-
-                    #print(str(d).replace(r"\n","").replace(" ", ""))
+                        lst = list()
+                        lst.append(left)
+                        lst.append(top)
+                        lst.append(right)
+                        lst.append(bottom)
+                        list_A.append(lst)
+                        print(("left ({0},{1}), right ({2}, {3}), top {4}, bottom {5}").format(left, d1[left], right, d1[right], top, bottom))
                     break
+            #ищем нижние строки таблиц
+
 
             #print(type(d).__name__ + " " + str(d))
 
